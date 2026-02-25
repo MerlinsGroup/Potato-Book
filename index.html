@@ -856,23 +856,72 @@
     });
   }
 
+  // Estimate syllable count for a word (vowel-group counting heuristic)
+  function estimateSyllables(word) {
+    word = word.toLowerCase().replace(/[^a-z]/g, '');
+    if (word.length <= 2) return 1;
+    // Count vowel groups
+    const vowelGroups = word.match(/[aeiouy]+/g);
+    let count = vowelGroups ? vowelGroups.length : 1;
+    // Silent 'e' at end
+    if (word.endsWith('e') && count > 1) count--;
+    // Words like "le" at end add a syllable
+    if (word.endsWith('le') && word.length > 2 && !/[aeiouy]/.test(word[word.length - 3])) count++;
+    return Math.max(count, 1);
+  }
+
+  // Check if a word ends with punctuation that causes a natural pause
+  function getPunctuationPause(word) {
+    const text = word.trim();
+    if (/[.!?]$/.test(text)) return 1.5;       // End of sentence — pause
+    if (/[;:]$/.test(text)) return 1.0;         // Semi-colon/colon — small pause
+    if (/[,\u2014\u2013—–]$/.test(text)) return 0.5; // Comma/dash — tiny pause
+    if (/\u2026$/.test(text)) return 1.5;       // Ellipsis — pause
+    return 0;
+  }
+
   function startWordHighlighting() {
     if (!pageAudio || wordSpans.length === 0) return;
 
     const totalDuration = pageAudio.duration;
-    const totalWords = wordSpans.length;
-    // Spread words across full duration so highlighting moves slowly
-    const effectiveDuration = totalDuration * 1.12;
+
+    // No leading silence offset
+    const leadingSilence = 0;
+    const speakingDuration = totalDuration;
+
+    // Weight each word by estimated syllables + punctuation pauses
+    const weights = wordSpans.map(s => {
+      const text = s.textContent;
+      const syllables = estimateSyllables(text);
+      const pauseWeight = getPunctuationPause(text);
+      // Base weight from syllables (each syllable ~1 unit), plus pause after punctuation
+      return syllables + pauseWeight;
+    });
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+
+    // Build cumulative time thresholds for each word
+    const wordTimings = [];
+    let cumulative = 0;
+    for (let i = 0; i < weights.length; i++) {
+      wordTimings.push(leadingSilence + (cumulative / totalWeight) * speakingDuration);
+      cumulative += weights[i];
+    }
 
     function tick() {
       if (!pageAudio || pageAudio.paused || pageAudio.ended) return;
 
       const elapsed = pageAudio.currentTime;
-      const progress = elapsed / effectiveDuration;
-      const targetIndex = Math.min(Math.floor(progress * totalWords), totalWords - 1);
+
+      // Find which word we should be on based on weighted timing
+      let targetIndex = 0;
+      for (let i = wordTimings.length - 1; i >= 0; i--) {
+        if (elapsed >= wordTimings[i]) {
+          targetIndex = i;
+          break;
+        }
+      }
 
       if (targetIndex !== currentWordIndex || currentWordIndex === 0) {
-        // Clear previous active
         wordSpans.forEach((s, i) => {
           if (i < targetIndex) {
             s.classList.remove('active-word');
@@ -880,7 +929,6 @@
           } else if (i === targetIndex) {
             s.classList.add('active-word');
             s.classList.remove('spoken-word');
-            // Scroll the word into view if needed
             scrollWordIntoView(s);
           } else {
             s.classList.remove('active-word', 'spoken-word');
