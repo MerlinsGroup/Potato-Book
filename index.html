@@ -1,1 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥔 The Grumpy Potatoes — A Children's Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page-bg: #fdf6e3;
+    --text-dark: #3e2723;
+    --text-body: #4e342e;
+    --accent-green: #558b2f;
+    --accent-orange: #e65100;
+    --accent-gold: #f9a825;
+    --accent-brown: #6d4c41;
+    --page-shadow: rgba(62, 39, 35, 0.15);
+  }
 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #2c1810;
+    font-family: 'Quicksand', sans-serif;
+    color: var(--text-body);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Bookshelf texture background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 30% 20%, rgba(139, 90, 43, 0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(93, 64, 55, 0.2) 0%, transparent 50%),
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.03) 40px, rgba(0,0,0,0.03) 41px);
+    z-index: 0;
+  }
+
+  /* Cover Page */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .cover-book {
+    background: var(--page-bg);
+    border-radius: 8px 24px 24px 8px;
+    padding: 60px 50px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow:
+      -6px 0 0 #c9a96e,
+      -8px 0 0 #b8944d,
+      -10px 0 0 #a07c3a,
+      8px 8px 30px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+    animation: coverFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes coverFloat {
+    0%, 100% { transform: translateY(0) rotate(-0.5deg); }
+    50% { transform: translateY(-8px) rotate(0.5deg); }
+  }
+
+  .cover-book::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 30px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.08), transparent);
+  }
+
+  .cover-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    color: var(--accent-orange);
+    text-shadow: 3px 3px 0 rgba(230, 81, 0, 0.15);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .cover-subtitle {
+    font-family: 'Patrick Hand', cursive;
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: var(--accent-brown);
+    margin-bottom: 30px;
+  }
+
+  .cover-potato {
+    font-size: 80px;
+    display: block;
+    margin: 20px auto;
+    animation: potatoWiggle 2s ease-in-out infinite;
+  }
+
+  @keyframes potatoWiggle {
+    0%, 100% { transform: rotate(-5deg) scale(1); }
+    25% { transform: rotate(5deg) scale(1.05); }
+    50% { transform: rotate(-3deg) scale(1); }
+    75% { transform: rotate(4deg) scale(1.02); }
+  }
+
+  .cover-instruction {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.1rem;
+    color: var(--accent-green);
+    margin-top: 20px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* Sound Toggle */
+  .sound-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: var(--page-bg);
+    border: 2px solid var(--accent-gold);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 22px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .sound-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 2px 2px 15px rgba(0,0,0,0.3);
+  }
+
+  /* Navigation */
+  .nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    z-index: 100;
+    background: linear-gradient(transparent, rgba(44, 24, 16, 0.95) 30%);
+    padding: 30px 20px 20px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .nav-bar.visible { display: flex; }
+
+  .nav-btn {
+    background: var(--page-bg);
+    border: 2px solid var(--accent-gold);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+  }
+  .nav-btn:hover { transform: scale(1.1); background: var(--accent-gold); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn:disabled:hover { transform: none; background: var(--page-bg); }
+
+  .page-indicator {
+    font-family: 'Patrick Hand', cursive;
+    color: var(--page-bg);
+    font-size: 1.1rem;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  /* Pages Container */
+  .pages-container {
+    position: relative;
+    z-index: 1;
+    display: none;
+  }
+  .pages-container.visible { display: block; }
+
+  /* Individual Page */
+  .story-page {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 100px;
+    animation: pageIn 0.6s ease-out;
+  }
+  .story-page.active { display: flex; }
+
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateX(40px) scale(0.97); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  .page-inner {
+    background: var(--page-bg);
+    border-radius: 8px 20px 20px 8px;
+    max-width: 750px;
+    width: 100%;
+    padding: 0;
+    box-shadow:
+      -4px 0 0 #d4b896,
+      -6px 0 0 #c9a96e,
+      6px 6px 25px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-inner::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 25px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.06), transparent);
+    z-index: 2;
+  }
+
+  /* Decorative page texture */
+  .page-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .chapter-header {
+    background: linear-gradient(135deg, var(--accent-green), #33691e);
+    padding: 20px 35px;
+    position: relative;
+    z-index: 3;
+  }
+
+  .chapter-number {
+    font-family: 'Patrick Hand', cursive;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .chapter-title {
+    font-family: 'Fredoka One', cursive;
+    color: #fff;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .page-illustration {
+    width: 100%;
+    position: relative;
+    z-index: 3;
+    overflow: hidden;
+  }
+
+  .page-illustration img,
+  .page-illustration .placeholder-img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 400px;
+  }
+
+  .placeholder-img {
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 100px;
+    position: relative;
+  }
+
+  /* Scene-specific illustration backgrounds */
+  .scene-village { background: linear-gradient(180deg, #87ceeb 0%, #90c695 40%, #6d8c3e 100%); }
+  .scene-village2 { background: linear-gradient(180deg, #f4a460 0%, #daa06d 40%, #8b6914 100%); }
+  .scene-hates { background: linear-gradient(180deg, #ffd54f 0%, #ff8a65 50%, #8d6e63 100%); }
+  .scene-leaves { background: linear-gradient(180deg, #4fc3f7 0%, #0288d1 50%, #01579b 100%); }
+  .scene-returns { background: linear-gradient(180deg, #ffcc80 0%, #a5d6a7 50%, #558b2f 100%); }
+  .scene-change { background: linear-gradient(180deg, #1a237e 0%, #4a148c 50%, #311b92 100%); }
+  .scene-attacks { background: linear-gradient(180deg, #263238 0%, #37474f 40%, #1b1b2f 100%); }
+  .scene-rumi { background: linear-gradient(180deg, #1a237e 0%, #283593 50%, #0d47a1 100%); }
+  .scene-sick { background: linear-gradient(180deg, #e8eaf6 0%, #c5cae9 50%, #9fa8da 100%); }
+  .scene-fear { background: linear-gradient(180deg, #212121 0%, #424242 50%, #1a1a2e 100%); }
+
+  .page-text {
+    padding: 30px 40px 40px;
+    position: relative;
+    z-index: 3;
+  }
+
+  .page-text p {
+    font-family: 'Patrick Hand', cursive;
+    font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+    line-height: 1.7;
+    color: var(--text-body);
+    margin-bottom: 16px;
+  }
+
+  .page-text p:last-child { margin-bottom: 0; }
+
+  .page-text .character-intro {
+    background: rgba(85, 139, 47, 0.08);
+    border-left: 4px solid var(--accent-green);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--accent-green);
+  }
+
+  .page-text .highlight {
+    color: var(--accent-orange);
+    font-weight: 700;
+  }
+
+  /* Double image layout for scene 1 */
+  .double-illustration {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    width: 100%;
+    position: relative;
+    z-index: 3;
+  }
+
+  .double-illustration .placeholder-img {
+    height: 280px;
+  }
+
+  .double-illustration .placeholder-img:first-child {
+    border-right: 3px solid var(--page-bg);
+  }
+
+  /* Page number decoration */
+  .page-num {
+    position: absolute;
+    bottom: 15px;
+    right: 25px;
+    font-family: 'Fredoka One', cursive;
+    color: rgba(109, 76, 65, 0.2);
+    font-size: 2.5rem;
+    z-index: 3;
+  }
+
+  /* Decorative elements */
+  .vine-left, .vine-right {
+    position: fixed;
+    top: 0;
+    width: 60px;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+  .vine-left { left: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 600'%3E%3Cpath d='M30 0 Q10 50 30 100 Q50 150 30 200 Q10 250 30 300 Q50 350 30 400 Q10 450 30 500 Q50 550 30 600' stroke='%23558b2f' fill='none' stroke-width='3'/%3E%3Ccircle cx='15' cy='80' r='8' fill='%2381c784'/%3E%3Ccircle cx='45' cy='180' r='6' fill='%2381c784'/%3E%3Ccircle cx='20' cy='280' r='9' fill='%2381c784'/%3E%3Ccircle cx='40' cy='380' r='7' fill='%2381c784'/%3E%3Ccircle cx='15' cy='480' r='8' fill='%2381c784'/%3E%3C/svg%3E") repeat-y; }
+  .vine-right { right: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 600'%3E%3Cpath d='M30 0 Q50 50 30 100 Q10 150 30 200 Q50 250 30 300 Q10 350 30 400 Q50 450 30 500 Q10 550 30 600' stroke='%23558b2f' fill='none' stroke-width='3'/%3E%3Ccircle cx='45' cy='80' r='8' fill='%2381c784'/%3E%3Ccircle cx='15' cy='180' r='6' fill='%2381c784'/%3E%3Ccircle cx='40' cy='280' r='9' fill='%2381c784'/%3E%3Ccircle cx='20' cy='380' r='7' fill='%2381c784'/%3E%3Ccircle cx='45' cy='480' r='8' fill='%2381c784'/%3E%3C/svg%3E") repeat-y; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .page-text { padding: 20px 25px 30px; }
+    .chapter-header { padding: 15px 25px; }
+    .cover-book { padding: 40px 30px; }
+    .double-illustration { grid-template-columns: 1fr; }
+    .double-illustration .placeholder-img:first-child { border-right: none; border-bottom: 3px solid var(--page-bg); }
+  }
+
+  /* "The End" styling */
+  .the-end {
+    text-align: center;
+    padding: 60px 40px;
+    position: relative;
+    z-index: 3;
+  }
+  .the-end h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--accent-orange);
+    margin-bottom: 10px;
+  }
+  .the-end p {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.2rem;
+    color: var(--accent-brown);
+  }
+</style>
+</head>
+<body>
+
+<div class="vine-left"></div>
+<div class="vine-right"></div>
+
+<!-- Sound Toggle -->
+<button class="sound-toggle" id="soundToggle" title="Toggle Sound">🔇</button>
+
+<!-- COVER -->
+<div class="cover" id="cover" onclick="startBook()">
+  <div class="cover-book">
+    <span class="cover-potato">🥔</span>
+    <h1 class="cover-title">The Grumpy Potatoes</h1>
+    <p class="cover-subtitle">A story from Ramba Village, Africa</p>
+    <p class="cover-instruction">✨ Tap to open the book ✨</p>
+  </div>
+</div>
+
+<!-- PAGES -->
+<div class="pages-container" id="pagesContainer">
+
+  <!-- PAGE 1: Ramba Village -->
+  <div class="story-page" data-page="1" data-sound="village">
+    <div class="page-inner">
+      <div class="chapter-header">
+        <div class="chapter-number">Chapter One</div>
+        <div class="chapter-title">🌿 Ramba Village</div>
+      </div>
+      <div class="double-illustration">
+        <img src="1.png" alt="Ramba Village" class="placeholder-img">
+        <img src="2.png" alt="The Lucka Family" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>Many years ago, in a small village called <span class="highlight">Ramba</span> in Africa, there lived the Lucka family.</p>
+        <div class="character-intro">
+          👩 Mother: Gana Lucka &nbsp;·&nbsp; 👨 Father: Dune Lucka &nbsp;·&nbsp; 👦 Son: Toni Lucka
+        </div>
+        <p>They were a very poor family. They grew vegetables on a small piece of land to survive, especially potatoes.</p>
+        <p>When Toni was 15 years old, his father died. Toni had to stop his studies and help his mother on the farm so they could earn money and continue living.</p>
+      </div>
+      <div class="page-num">1</div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: Toni Hates Potatoes -->
+  <div class="story-page" data-page="2" data-sound="angry">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #e65100, #bf360c);">
+        <div class="chapter-number">Chapter Two</div>
+        <div class="chapter-title">😤 Toni Hates Potatoes</div>
+      </div>
+      <div class="page-illustration">
+        <img src="3.png" alt="Toni Hates Potatoes" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>They grew potatoes every year. But Toni <span class="highlight">never liked potatoes</span>. He thought they were sticky and ugly.</p>
+        <p>When he was younger, he once threw a whole basket of potatoes into a dry field because he was so angry. He called them <span class="highlight">"grumpy and stinky potatoes!"</span></p>
+        <p>He did not realise that potatoes can grow again from the ground. Over time, those potatoes spread and grew in a huge area outside the village...</p>
+      </div>
+      <div class="page-num">2</div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: Toni Leaves Ramba -->
+  <div class="story-page" data-page="3" data-sound="travel">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #0277bd, #01579b);">
+        <div class="chapter-number">Chapter Three</div>
+        <div class="chapter-title">✈️ Toni Leaves Ramba</div>
+      </div>
+      <div class="page-illustration">
+        <img src="4.png" alt="Toni Leaves Ramba" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>When Toni became older, he went to America and worked as a builder. He earned good money and later bought a new house for his mother.</p>
+        <p>He promised his mother that one day he would buy more land for farming and make her proud.</p>
+        <p>Every two years, Toni visited Ramba with his family. By this time, he was married and had two children: <span class="highlight">Todi Lucka</span> (his son) and <span class="highlight">Rumi Lucka</span> (his daughter).</p>
+      </div>
+      <div class="page-num">3</div>
+    </div>
+  </div>
+
+  <!-- PAGE 4: Returning to Ramba -->
+  <div class="story-page" data-page="4" data-sound="village">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #558b2f, #33691e);">
+        <div class="chapter-number">Chapter Four</div>
+        <div class="chapter-title">🏡 Returning to Ramba</div>
+      </div>
+      <div class="page-illustration">
+        <img src="5.png" alt="Returning to Ramba" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>When Rumi was 4 years old, the family decided to move back permanently to Ramba village.</p>
+        <p>Now Todi was 18 years old and Rumi was just 4. Grandmother Gana was <span class="highlight">very happy</span> to live with her son and grandchildren again.</p>
+        <p>She often took Todi to the fields and showed him how they used to grow vegetables on the small land. She proudly explained how their village was famous for growing potatoes.</p>
+        <p>But Todi did not care much about potatoes...</p>
+      </div>
+      <div class="page-num">4</div>
+    </div>
+  </div>
+
+  <!-- PAGE 5: The Potatoes Change -->
+  <div class="story-page" data-page="5" data-sound="spooky">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #4a148c, #311b92);">
+        <div class="chapter-number">Chapter Five</div>
+        <div class="chapter-title">🌙 The Potatoes Change</div>
+      </div>
+      <div class="page-illustration">
+        <img src="6.png" alt="The Potatoes Change" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>The potatoes that Toni had thrown away many years ago had grown and spread across a huge area.</p>
+        <p>Over time, something <span class="highlight">strange</span> began to happen. The potatoes became <span class="highlight">angry</span>.</p>
+        <p>They felt ignored by the villagers. They believed humans no longer needed them and did not respect them. They remembered being called "grumpy" and "stinky."</p>
+        <p>The Grumpy Potato family held meetings at night. They decided to take <span class="highlight">revenge</span> on the humans.</p>
+      </div>
+      <div class="page-num">5</div>
+    </div>
+  </div>
+
+  <!-- PAGE 6: Night Attacks Begin -->
+  <div class="story-page" data-page="6" data-sound="night">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #263238, #1b1b2f);">
+        <div class="chapter-number">Chapter Six</div>
+        <div class="chapter-title">🌑 Night Attacks Begin</div>
+      </div>
+      <div class="page-illustration">
+        <img src="7.png" alt="Night Attacks Begin" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>Every night, crops were crushed, vegetables were destroyed, and rotten potatoes were placed in boxes before the Lucka family went to sell food at the market.</p>
+        <p>People thought animals or rats were doing it. The villagers placed guards in the fields at night.</p>
+        <p>But the Grumpy Potatoes were <span class="highlight">clever</span>. They moved quietly in the dark. They attacked the guards and scared them so badly that the guards thought <span class="highlight">ghosts</span> were chasing them.</p>
+        <p>Soon, nobody wanted to go out at night. The entire village became afraid.</p>
+      </div>
+      <div class="page-num">6</div>
+    </div>
+  </div>
+
+  <!-- PAGE 7: Rumi and the Secret -->
+  <div class="story-page" data-page="7" data-sound="magical">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #283593, #1565c0);">
+        <div class="chapter-number">Chapter Seven</div>
+        <div class="chapter-title">🌟 Rumi and the Secret</div>
+      </div>
+      <div class="page-illustration">
+        <img src="8.png" alt="Rumi and the Secret" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>One night, little Rumi saw something moving behind a big tree.</p>
+        <p>She quietly walked toward it. It was the Grumpy Potato family hiding behind the trees.</p>
+        <p>They tried to scare her, but Rumi was <span class="highlight">brave</span>. She spoke softly to them.</p>
+        <p>The potatoes told her their story — how they felt forgotten and unwanted by humans. Rumi promised she would not tell anyone.</p>
+        <p>After that, she secretly visited them every night.</p>
+      </div>
+      <div class="page-num">7</div>
+    </div>
+  </div>
+
+  <!-- PAGE 8: Rumi Becomes Sick -->
+  <div class="story-page" data-page="8" data-sound="sad">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #5c6bc0, #7986cb);">
+        <div class="chapter-number">Chapter Eight</div>
+        <div class="chapter-title">💔 Rumi Becomes Sick</div>
+      </div>
+      <div class="page-illustration">
+        <img src="9.png" alt="Rumi Becomes Sick" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>Because Rumi kept going outside at night, she slowly became very weak and sick.</p>
+        <p>The Lucka family became <span class="highlight">worried</span>. They took her to the doctor, but even after medicine, she did not feel better.</p>
+        <p>At the same time, the Grumpy Potatoes put rotten potatoes in their market boxes so nobody would buy from them. The family could not earn enough money.</p>
+        <p>They needed money for Rumi's treatment.</p>
+      </div>
+      <div class="page-num">8</div>
+    </div>
+  </div>
+
+  <!-- PAGE 9: The Village in Fear -->
+  <div class="story-page" data-page="9" data-sound="night">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #212121, #37474f);">
+        <div class="chapter-number">Chapter Nine</div>
+        <div class="chapter-title">😰 The Village in Fear</div>
+      </div>
+      <div class="page-illustration">
+        <img src="10.png" alt="The Village in Fear" class="placeholder-img">
+      </div>
+      <div class="page-text">
+        <p>The attacks continued. Crops were destroyed nightly. Guards refused to work.</p>
+        <p>Villagers stayed inside after dark. Rumours spread that <span class="highlight">ghosts</span> were attacking Ramba.</p>
+        <p>No one wanted to farm at night anymore. The village became silent and scared.</p>
+      </div>
+      <div class="page-num">9</div>
+    </div>
+  </div>
+
+  <!-- PAGE 10: To Be Continued -->
+  <div class="story-page" data-page="10" data-sound="magical">
+    <div class="page-inner">
+      <div class="chapter-header" style="background: linear-gradient(135deg, #f9a825, #e65100);">
+        <div class="chapter-number">Chapter Ten</div>
+        <div class="chapter-title">🥔 Where It Stops...</div>
+      </div>
+      <div class="page-illustration">
+        <img src="11.png" alt="To Be Continued" class="placeholder-img" style="max-height: 200px;">
+      </div>
+      <div class="page-text">
+        <p>Rumi continues secretly visiting at night. Her mother, Rita Lucka, begins to notice that something strange is happening — that someone is not in the field at night.</p>
+        <p>And the village remains afraid of what happens after dark...</p>
+      </div>
+      <div class="the-end">
+        <h2>To Be Continued... 🥔</h2>
+        <p>What will happen next in Ramba Village?</p>
+      </div>
+      <div class="page-num">10</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAVIGATION -->
+<div class="nav-bar" id="navBar">
+  <button class="nav-btn" id="prevBtn" onclick="prevPage()">◀</button>
+  <span class="page-indicator" id="pageIndicator">1 / 10</span>
+  <button class="nav-btn" id="nextBtn" onclick="nextPage()">▶</button>
+</div>
+
+<script>
+  // ─── Audio Engine using Web Audio API ───
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  let soundEnabled = false;
+  let currentAmbience = null;
+
+  function initAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playNote(freq, duration, type = 'sine', vol = 0.08, delay = 0) {
+    if (!soundEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + delay + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + delay);
+    osc.stop(audioCtx.currentTime + delay + duration);
+  }
+
+  function playChime() {
+    [523, 659, 784].forEach((f, i) => playNote(f, 0.4, 'sine', 0.06, i * 0.12));
+  }
+
+  function playPageTurn() {
+    // Soft whoosh-like sound
+    if (!soundEnabled || !audioCtx) return;
+    const bufferSize = audioCtx.sampleRate * 0.15;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize) * 0.3;
+    }
+    const source = audioCtx.createBufferSource();
+    const filter = audioCtx.createBiquadFilter();
+    const gain = audioCtx.createGain();
+    source.buffer = buffer;
+    filter.type = 'lowpass';
+    filter.frequency.value = 800;
+    gain.gain.value = 0.15;
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    source.start();
+  }
+
+  const soundScapes = {
+    village: () => {
+      // Gentle, warm melody — birds and nature
+      const notes = [392, 440, 494, 523, 494, 440, 392, 330];
+      notes.forEach((f, i) => playNote(f, 0.6, 'sine', 0.04, i * 0.35));
+      // Add some bird-like chirps
+      [1200, 1400, 1100].forEach((f, i) => playNote(f, 0.1, 'sine', 0.02, i * 0.8 + 0.2));
+    },
+    angry: () => {
+      // Tense, low rumbling notes
+      const notes = [196, 185, 175, 165, 196, 220];
+      notes.forEach((f, i) => playNote(f, 0.5, 'sawtooth', 0.03, i * 0.3));
+      playNote(110, 1.5, 'triangle', 0.04, 0);
+    },
+    travel: () => {
+      // Uplifting, adventurous melody
+      const notes = [262, 330, 392, 523, 659, 784, 659, 523];
+      notes.forEach((f, i) => playNote(f, 0.35, 'triangle', 0.05, i * 0.2));
+    },
+    spooky: () => {
+      // Eerie, mysterious tones
+      const notes = [220, 233, 220, 208, 196, 208, 220, 233];
+      notes.forEach((f, i) => playNote(f, 0.7, 'sine', 0.035, i * 0.4));
+      playNote(55, 3, 'triangle', 0.03, 0); // deep drone
+    },
+    night: () => {
+      // Dark, tense atmosphere
+      playNote(82, 2.5, 'triangle', 0.04, 0);
+      playNote(87, 2.5, 'triangle', 0.03, 0.5);
+      [330, 311, 294, 277, 262].forEach((f, i) => playNote(f, 0.8, 'sine', 0.02, i * 0.5));
+    },
+    magical: () => {
+      // Sparkling, wonder-filled
+      const notes = [523, 659, 784, 880, 1047, 880, 784, 659];
+      notes.forEach((f, i) => playNote(f, 0.3, 'sine', 0.04, i * 0.18));
+      [1319, 1568, 1760].forEach((f, i) => playNote(f, 0.15, 'sine', 0.02, i * 0.4 + 0.1));
+    },
+    sad: () => {
+      // Slow, melancholy melody
+      const notes = [262, 247, 233, 220, 208, 196, 185, 175];
+      notes.forEach((f, i) => playNote(f, 0.8, 'sine', 0.04, i * 0.45));
+    }
+  };
+
+  function playSoundForPage(soundKey) {
+    if (!soundEnabled || !audioCtx) return;
+    if (soundScapes[soundKey]) {
+      soundScapes[soundKey]();
+    }
+  }
+
+  // ─── Sound Toggle ───
+  const soundToggle = document.getElementById('soundToggle');
+  soundToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    soundEnabled = !soundEnabled;
+    soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+    if (soundEnabled) {
+      initAudio();
+      playChime();
+    }
+  });
+
+  // ─── Book Logic ───
+  let currentPage = 1;
+  const totalPages = 10;
+
+  function startBook() {
+    initAudio();
+    document.getElementById('cover').style.display = 'none';
+    document.getElementById('pagesContainer').classList.add('visible');
+    document.getElementById('navBar').classList.add('visible');
+    showPage(1);
+    if (soundEnabled) playChime();
+  }
+
+  function showPage(num) {
+    document.querySelectorAll('.story-page').forEach(p => p.classList.remove('active'));
+    const page = document.querySelector(`.story-page[data-page="${num}"]`);
+    if (page) {
+      page.classList.add('active');
+      const soundKey = page.dataset.sound;
+      playSoundForPage(soundKey);
+    }
+    document.getElementById('pageIndicator').textContent = `${num} / ${totalPages}`;
+    document.getElementById('prevBtn').disabled = num <= 1;
+    document.getElementById('nextBtn').disabled = num >= totalPages;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function nextPage() {
+    if (currentPage < totalPages) {
+      currentPage++;
+      playPageTurn();
+      showPage(currentPage);
+    }
+  }
+
+  function prevPage() {
+    if (currentPage > 1) {
+      currentPage--;
+      playPageTurn();
+      showPage(currentPage);
+    }
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextPage();
+    if (e.key === 'ArrowLeft') prevPage();
+  });
+
+  // Swipe support for mobile
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 60) {
+      if (diff > 0) nextPage();
+      else prevPage();
+    }
+  });
+</script>
+
+</body>
+</html>
